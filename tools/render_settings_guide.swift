@@ -1,6 +1,6 @@
 // Renders the Picture-in-Picture walkthrough shown while the user is in iPhone Settings.
 // Equal can only open its own page there, so the video starts on it: ‹ Apps, then Phone,
-// Live Voicemail off, Screen Unknown Callers › Never.
+// Live Voicemail off.
 //
 //   swift tools/render_settings_guide.swift EqualOrbOnboarding/Resources/Video/settings_guide.mp4 [stills-folder]
 //
@@ -14,7 +14,7 @@ let size = CGSize(width: 360, height: 480)
 let phoneH: CGFloat = 400
 let scale: CGFloat = 2
 let fps: Int32 = 30
-let duration = 12.0
+let duration = 8.5
 
 // MARK: Timeline
 
@@ -28,21 +28,18 @@ let taps: [(Double, CGPoint)] = [
     (0.9, CGPoint(x: 34, y: 28)),     // ‹ back to Apps
     (2.4, CGPoint(x: 150, y: 136)),   // Phone
     (4.2, CGPoint(x: 304, y: 136)),   // Live Voicemail switch
-    (6.0, CGPoint(x: 150, y: 245)),   // Screen Unknown Callers
-    (7.8, CGPoint(x: 150, y: 88)),    // Never
 ]
 
 let backToApps = 1.15                       // Equal AI → Apps
-let pushes: [Double] = [2.65, 6.25]         // Apps → Phone → Screen Unknown
-let popAt = 8.6                              // back to Phone
+let pushes: [Double] = [2.65]               // Apps → Phone
+let allSet = 5.6                             // “All set” takes over
 let showPhone = 2.0                          // the page above Apps becomes Phone (it's off screen then)
 
 struct Caption { let from: Double; let step: String; let text: String }
 let captions = [
-    Caption(from: 0, step: "Step 1 of 3", text: "Tap ‹ Apps, then Phone"),
-    Caption(from: 3.3, step: "Step 2 of 3", text: "Turn Live Voicemail off"),
-    Caption(from: 5.2, step: "Step 3 of 3", text: "Screen Unknown Callers › Never"),
-    Caption(from: 9.4, step: "All set", text: "Now come back to Equal AI"),
+    Caption(from: 0, step: "Step 1 of 2", text: "Tap ‹ Apps, then Phone"),
+    Caption(from: 3.3, step: "Step 2 of 2", text: "Turn Live Voicemail off"),
+    Caption(from: allSet, step: "All set", text: "Now come back to Equal AI"),
 ]
 
 // MARK: Drawing
@@ -149,9 +146,8 @@ struct Frame: View {
     let t: Double
 
     var voicemail: Double { 1 - ramp(t, 4.25, 4.55) }
-    var never: Bool { t >= 7.85 }
 
-    /// Apps, then the page above it (Equal AI, later Phone), then Screen Unknown Callers.
+    /// Apps, then the page above it (Equal AI, later Phone).
     func pages() -> [AnyView] {
         [
             AnyView(Page(title: "Apps") {
@@ -160,11 +156,6 @@ struct Frame: View {
                              Row(icon: "camera.fill", tint: .gray, title: "Camera")])
             }),
             t < showPhone ? equalPage : phonePage,
-            AnyView(Page(title: "Screen Unknown Callers") {
-                Card(rows: [Row(title: "Never", chevron: false, check: never),
-                             Row(title: "Ask Reason for Calling", chevron: false, check: !never),
-                             Row(title: "Silence", chevron: false)])
-            }),
         ]
     }
 
@@ -184,16 +175,14 @@ struct Frame: View {
                 Card(rows: [Row(title: "Calls on Other Devices"),
                              Row(title: "Live Voicemail", toggle: voicemail)])
                 Footer(text: "View a transcript of an incoming voicemail and answer the call before it ends.")
-                Card(rows: [Row(title: "Screen Unknown Callers", value: never ? "Never" : "Ask"),
-                             Row(title: "Silence Junk Callers", toggle: 0)])
             })
     }
 
-    /// Current navigation position as a fractional page index: back to Apps, two pushes, one pop.
+    /// Current navigation position as a fractional page index: back to Apps, then into Phone.
     var position: Double {
         var p = 1 - ramp(t, backToApps, backToApps + 0.4)
         for at in pushes { p += ramp(t, at, at + 0.4) }
-        return p - ramp(t, popAt, popAt + 0.4)
+        return p
     }
 
     var body: some View {
@@ -243,7 +232,7 @@ struct Frame: View {
                     }
                 }
                 if done {
-                    let k = ramp(t, 9.4, 9.8)
+                    let k = ramp(t, allSet, allSet + 0.4)
                     ZStack {
                         Color.white.opacity(0.85 * k)
                         VStack(spacing: 12) {
@@ -321,7 +310,7 @@ MainActor.assumeIsolated {
         while !input.isReadyForMoreMediaData { Thread.sleep(forTimeInterval: 0.005) }
         adaptor.append(buf, withPresentationTime: CMTime(value: CMTimeValue(f), timescale: fps))
         // Optional second argument: a folder for a few still frames to eyeball.
-        if CommandLine.arguments.count > 2, [12, 27, 40, 69, 123, 177, 231, 315].contains(f), let png = NSBitmapImageRep(cgImage: cg).representation(using: .png, properties: [:]) {
+        if CommandLine.arguments.count > 2, [12, 27, 40, 69, 110, 135, 150, 200].contains(f), let png = NSBitmapImageRep(cgImage: cg).representation(using: .png, properties: [:]) {
             try? png.write(to: URL(fileURLWithPath: CommandLine.arguments[2]).appendingPathComponent("guide_\(f).png"))
         }
     }

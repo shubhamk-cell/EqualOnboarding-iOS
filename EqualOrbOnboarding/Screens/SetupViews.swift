@@ -310,7 +310,7 @@ struct ForwardingView: View {
 
 // MARK: - Live Voicemail
 
-/// Two iPhone settings so Equal answers instead of voicemail. “Open Settings” opens the real
+/// One iPhone setting, Live Voicemail off, so Equal answers instead of voicemail. “Open Settings” opens the real
 /// iPhone Settings with a walkthrough floating in Picture in Picture; coming back turns the
 /// button into Continue.
 struct VoicemailView: View {
@@ -326,10 +326,9 @@ struct VoicemailView: View {
         let done = model.accessDone
         SetupLayout(lottie: "voicemail", talk: talk, title: title, fillHero: true, guide: guide) {
             VStack(alignment: .leading, spacing: 6) {
-                // Plain instructions: they never tick, since Equal can't read these settings.
+                // Plain instructions: they never tick, since Equal can't read the setting.
                 BulletRow(text: "In Settings, tap **‹ Apps**, then **Phone**", done: false)
                 BulletRow(text: "Turn **Live Voicemail** off", done: false)
-                BulletRow(text: "Set **Screen Unknown Callers** to Never", done: false)
             }
         } footer: {
             VStack(spacing: 4) {
@@ -367,7 +366,7 @@ struct VoicemailView: View {
         await guide.start()
     }
 
-    /// iOS doesn't let apps read these settings, so returning from Settings counts as done.
+    /// iOS doesn't let apps read this setting, so returning from Settings counts as done.
     private func cameBack() {
         leftForSettings = false
         guide.finish()
