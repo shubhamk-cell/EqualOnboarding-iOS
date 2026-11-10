@@ -82,7 +82,8 @@ extension SettingsGuide: AVPictureInPictureControllerDelegate {
     }
 }
 
-/// The inline player PiP lifts the video from. It has to be on screen, so it hides behind an opaque view.
+/// The inline player PiP lifts the video from and returns it to. It has to be on screen, so it is
+/// drawn under the sky (see `GuideSlot`).
 struct SettingsGuideAnchor: UIViewRepresentable {
     let guide: SettingsGuide
 
@@ -100,5 +101,39 @@ struct SettingsGuideAnchor: UIViewRepresentable {
     final class PlayerView: UIView {
         override class var layerClass: AnyClass { AVPlayerLayer.self }
         var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
+    }
+}
+
+// MARK: - Where the guide lives
+
+/// A step's walkthrough marks its frame with this, and the root view draws the guide's player
+/// there, beneath the opaque sky: on screen as PiP requires, never seen, and the PiP window grows
+/// out of the walkthrough and shrinks back into it.
+struct GuideSlot: Identifiable {
+    let guide: SettingsGuide
+    let bounds: Anchor<CGRect>
+    var id: ObjectIdentifier { ObjectIdentifier(guide) }
+}
+
+struct GuideSlotKey: PreferenceKey {
+    static let defaultValue: [GuideSlot] = []
+    static func reduce(value: inout [GuideSlot], nextValue: () -> [GuideSlot]) { value += nextValue() }
+}
+
+extension View {
+    /// Draws the players for any `GuideSlot`s inside, behind this view.
+    func guideSlots() -> some View {
+        backgroundPreferenceValue(GuideSlotKey.self) { slots in
+            GeometryReader { proxy in
+                ForEach(slots) { slot in
+                    let r = proxy[slot.bounds]
+                    SettingsGuideAnchor(guide: slot.guide)
+                        .frame(width: r.width, height: r.height)
+                        .position(x: r.midX, y: r.midY)
+                }
+            }
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+        }
     }
 }

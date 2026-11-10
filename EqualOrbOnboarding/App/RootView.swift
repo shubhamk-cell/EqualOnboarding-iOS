@@ -68,6 +68,8 @@ struct RootView: View {
                     .zIndex(20)
             }
         }
+        // PiP guides' players, under everything opaque, at their step's walkthrough.
+        .guideSlots()
         .preferredColorScheme(model.step == .splash ? .dark : .light)
     }
 }

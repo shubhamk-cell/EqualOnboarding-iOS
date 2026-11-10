@@ -147,7 +147,8 @@ struct ForwardingView: View {
     }
 
     var body: some View {
-        SetupLayout(lottie: "forwarding", hero: AnyView(ForwardingWalkthrough(mode: mode)), talk: talk, title: title) {
+        SetupLayout(lottie: "forwarding", hero: AnyView(ForwardingWalkthrough(mode: mode)), talk: talk, title: title,
+                    guide: mode == .copy ? guide : nil) {
             codeRow
                 .padding(.bottom, 12)
             // Plain instructions: they never tick, since Equal can't see what happened in Phone.
@@ -205,7 +206,6 @@ struct ForwardingView: View {
                     .animation(.easeInOut(duration: 0.25), value: light)
             }
             .buttonStyle(PressStyle())
-            .background { if mode == .copy { SettingsGuideAnchor(guide: guide).frame(width: 28, height: 28) } }   // hidden behind the button, well inside its 40 pt height
         }
         .padding(.leading, 20)
         .padding(.trailing, 6)
@@ -324,7 +324,7 @@ struct VoicemailView: View {
 
     var body: some View {
         let done = model.accessDone
-        SetupLayout(lottie: "voicemail", talk: talk, title: title, fillHero: true) {
+        SetupLayout(lottie: "voicemail", talk: talk, title: title, fillHero: true, guide: guide) {
             VStack(alignment: .leading, spacing: 6) {
                 // Plain instructions: they never tick, since Equal can't read these settings.
                 BulletRow(text: "In Settings, tap **‹ Apps**, then **Phone**", done: false)
@@ -337,7 +337,6 @@ struct VoicemailView: View {
                     if done { model.next() } else { Task { await openSettings() } }
                 }
                 .buttonStyle(PrimaryButtonStyle())
-                .background { SettingsGuideAnchor(guide: guide).frame(width: 28, height: 28) }   // hidden behind the button, well inside its 52 pt height
                 // Back from Settings: a way to go round again, with the walkthrough.
                 if done {
                     Button { Task { await openSettings() } } label: {
@@ -388,6 +387,9 @@ struct SetupLayout<Details: View, Footer: View>: View {
     var title: String
     /// Let the walkthrough grow into all the spare height, so the message and steps sit just above the footer.
     var fillHero = false
+    /// The Picture in Picture guide, if this step floats one: it grows out of the walkthrough and
+    /// shrinks back into it.
+    var guide: SettingsGuide? = nil
     @ViewBuilder var details: Details
     @ViewBuilder var footer: Footer
 
@@ -396,6 +398,11 @@ struct SetupLayout<Details: View, Footer: View>: View {
             Group {
                 if let hero { hero } else { LottieHero(name: lottie) }
             }
+                // PiP lifts the guide from here and shrinks it back into here: its player is drawn
+                // at this spot, under the page's sky (see `GuideSlot`).
+                .anchorPreference(key: GuideSlotKey.self, value: .bounds) { b in
+                    guide.map { [GuideSlot(guide: $0, bounds: b)] } ?? []
+                }
                 // On shorter phones the walkthrough gives up height first, so the steps never crowd the footer.
                 .frame(minHeight: 130, maxHeight: fillHero ? .infinity : 300, alignment: .bottom)
                 .layoutPriority(fillHero ? 1 : 0)
