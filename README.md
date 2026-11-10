@@ -18,7 +18,7 @@ delete the app (or run `xcrun simctl privacy booted reset all ai.equal.onboardin
 2. **Number** – the bubble types “What number do you get calls on?”; +91 field with the send button merged in, WhatsApp opt-in, terms.
 3. **Code** – 4827 fills in digit by digit, “Verifying…”, then the real **App Tracking Transparency** prompt.
 4. **Name** – “What should I call you?”.
-5. **Picks** – twenty-five everyday jobs as two-per-row pills (widths follow the text), scrolling under the sticky orb. Continue curates in place: unpicked pills fade,
+5. **Picks** – twelve everyday jobs as two-per-row pills (widths follow the text), scrolling under the sticky orb. Continue curates in place: unpicked pills fade,
    the orb's dots gather into a spinning ring (“Curating sample calls from your picks…”), then the top three return as
    **sample-call cards**. Nothing plays until you tap: the waveform fills with a live timer; tap another to switch, tap play/pause/replay.
 6. **Permissions** – lock-screen art; the orb explains, then the real **Notifications** prompt, then **Contacts**.

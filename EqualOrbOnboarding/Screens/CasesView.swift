@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// “What can I handle for you? Pick any” — twenty-five everyday jobs as two-per-row pills, scrolling under the orb.
+/// “What can I handle for you? Pick any” — twelve everyday jobs as two-per-row pills, scrolling under the orb.
 /// The orb and its bubble arrive alone in the middle of the page; once the question is typed,
 /// the options rise in underneath and push them up.
 /// Continue curates on the same screen: the unpicked pills fade away and the top three picks
