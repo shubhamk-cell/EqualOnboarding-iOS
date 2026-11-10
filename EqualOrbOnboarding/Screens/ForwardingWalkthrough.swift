@@ -27,7 +27,7 @@ struct ForwardingWalkthrough: View {
                     .frame(width: g.size.width, height: g.size.height, alignment: .bottom)
             }
         }
-        // A long eased fade, so the screen melts into the sky instead of ending in a band.
+        // A long eased fade, so the dark screen melts into the sky instead of ending in a band.
         .mask(SoftBottomFade(start: 0.58))
         .opacity(shown ? 1 : 0)
         .offset(y: shown ? 0 : 24)
@@ -89,7 +89,7 @@ private struct Phone: View {
                 if mode == .call {
                     CallPrompt(t: t).opacity(window(t, Beat.dial.0, Beat.dial.1, fade: 0.25))
                 }
-                StatusBar(dark: false)
+                StatusBar(dark: window(t, Beat.carrier.0, Beat.carrier.1, fade: 0.25) > 0.5)
                 TapMarks(t: t, mode: mode)
             }
             .frame(width: w - 14, height: 420)
@@ -362,7 +362,7 @@ private struct CarrierScreen: View {
         VStack(spacing: 12) {
             Text("Calling…")
                 .font(.system(size: 12.5))
-                .foregroundStyle(.black.opacity(0.5))
+                .foregroundStyle(.white.opacity(0.6))
             ForEach(kinds.indices, id: \.self) { i in
                 let a = ramp(t, Beat.carrier.0 + 0.6 + Double(i) * 0.35, Beat.carrier.0 + 0.9 + Double(i) * 0.35)
                 VStack(spacing: 1) {
@@ -372,7 +372,7 @@ private struct CarrierScreen: View {
                         .font(.system(size: 12))
                         .opacity(0.75)
                 }
-                .foregroundStyle(.black.opacity(i == 0 ? 1 : 0.8))
+                .foregroundStyle(.white.opacity(i == 0 ? 1 : 0.8))
                 .opacity(a)
                 .offset(y: 6 * (1 - a))
             }
@@ -381,12 +381,12 @@ private struct CarrierScreen: View {
                 .foregroundStyle(.black)
                 .padding(.horizontal, 30)
                 .frame(height: 32)
-                .background(Capsule().fill(Color(hex: 0xE5E5EA)))
+                .background(Capsule().fill(.white))
                 .opacity(ramp(t, Beat.carrier.0 + 1.8, Beat.carrier.0 + 2.1))
                 .padding(.top, 4)
         }
         .padding(.top, 58)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(Color(hex: 0xF6F7F5))
+        .background(Color(hex: 0x111111))
     }
 }
