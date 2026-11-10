@@ -395,7 +395,7 @@ struct SetupLayout<Details: View, Footer: View>: View {
     var body: some View {
         VStack(spacing: 0) {
             Group {
-                if let hero { hero } else { LottieHero(name: lottie) }
+                if let hero { hero } else { LottieHero(name: lottie, drawingTop: fillHero ? 0.155 : 0) }
             }
                 // PiP lifts the guide from here and shrinks it back into here: its player is drawn
                 // at this spot, under the page's sky (see `GuideSlot`).
@@ -445,9 +445,38 @@ struct SoftBottomFade: View {
 /// Looping walkthrough; rises in once the screen has landed and fades out at the bottom.
 struct LottieHero: View {
     let name: String
+    /// How far down its canvas the drawing starts (0…1). The walkthrough grows up from its faded
+    /// bottom until the drawing's top sits just under the top of its space, so there's no empty
+    /// band above it whatever the phone's height.
+    var drawingTop: CGFloat = 0
     @State private var shown = false
 
+    /// Room left between the top of the space and the top of the drawing.
+    private static let headroom: CGFloat = 36
+
     var body: some View {
+        Group {
+            if drawingTop > 0, let size = LottieAnimation.named(name)?.size, size.width > 0 {
+                GeometryReader { g in
+                    let fitted = min(g.size.width * size.height / size.width, g.size.height)
+                    let grow = min(max((g.size.height - Self.headroom) / (fitted * (1 - drawingTop)), 1), 1.3)
+                    lottie
+                        .frame(width: g.size.width, height: fitted)
+                        .scaleEffect(grow, anchor: .bottom)
+                        .frame(width: g.size.width, height: g.size.height, alignment: .bottom)
+                }
+            } else {
+                lottie
+            }
+        }
+        .opacity(shown ? 1 : 0)
+        .offset(y: shown ? 0 : 24)
+        .scaleEffect(shown ? 1 : 0.96)
+        .onAppear { withAnimation(EQ.ease(0.7).delay(0.45)) { shown = true } }
+        .accessibilityHidden(true)
+    }
+
+    private var lottie: some View {
         LottieView(animation: .named(name))
             .playing(loopMode: .loop)
             .resizable()
@@ -455,11 +484,6 @@ struct LottieHero: View {
             .frame(maxWidth: .infinity)
             .shadow(color: Color(hex: 0x00280F).opacity(0.28), radius: 13, y: 14)
             .mask(SoftBottomFade(start: 0.62))
-            .opacity(shown ? 1 : 0)
-            .offset(y: shown ? 0 : 24)
-            .scaleEffect(shown ? 1 : 0.96)
-            .onAppear { withAnimation(EQ.ease(0.7).delay(0.45)) { shown = true } }
-            .accessibilityHidden(true)
     }
 }
 
