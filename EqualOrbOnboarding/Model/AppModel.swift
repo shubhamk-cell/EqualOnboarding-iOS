@@ -58,19 +58,15 @@ enum Lang: String, CaseIterable, Identifiable {
 final class Language: ObservableObject {
     static let shared = Language()
     @Published var current: Lang = .en
-    /// After the first nudge of the orb, the header also offers a language menu.
-    @Published var menuUnlocked = false
 
     /// The orb was tapped or dragged: the next language, wrapping round to the first.
     func next() {
         let all = Lang.allCases
         current = all[(all.firstIndex(of: current)! + 1) % all.count]
-        menuUnlocked = true
     }
 
     func reset() {
         current = .en
-        menuUnlocked = false
     }
 }
 

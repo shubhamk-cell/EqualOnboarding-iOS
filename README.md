@@ -33,7 +33,7 @@ delete the app (or run `xcrun simctl privacy booted reset all ai.equal.onboardin
 
 **Everywhere:** tap the orb for a jelly squish, ripple, sparkles and a wave through the dots; drag it to stretch it on a rubber
 band. Either way the bubble turns mint and retypes its line in the next language (English → हिन्दी → தமிழ் → বাংলা → English).
-After the first nudge, a native language menu appears in the top bar. Back and Skip work as in the prototype.
+A native language menu sits in the top bar on every onboarding screen. Back and Skip work as in the prototype.
 
 ## Onboarding versions
 The app opens on **Home**. The **You** tab lists every onboarding version; tapping one runs it from the splash, and it

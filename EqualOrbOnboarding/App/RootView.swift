@@ -125,11 +125,10 @@ struct FlowContainer: View {
     }
 }
 
-/// Back on the left, Skip on the right, and — once the orb has been nudged — a language menu
+/// Back on the left, Skip on the right, and the language menu always
 /// in the middle. Swaps instantly (it doesn't slide with the screen).
 private struct TopBar: View {
     @EnvironmentObject var model: AppModel
-    @ObservedObject private var language = Language.shared
 
     var body: some View {
         HStack {
@@ -151,13 +150,10 @@ private struct TopBar: View {
         .frame(height: 58, alignment: .bottom)
         .transaction { $0.animation = nil }
         .overlay(alignment: .bottom) {
-            if language.menuUnlocked, model.step != .welcome {
-                LanguageMenu()
-                    .padding(.bottom, 6)
-                    .transition(.scale(scale: 0.6).combined(with: .opacity))
-            }
+            // The orb's language, always one tap away on every onboarding screen.
+            LanguageMenu()
+                .padding(.bottom, 6)
         }
-        .animation(EQ.pop(0.5), value: language.menuUnlocked)
         .riseIn(model.arrivingFromSplash && model.step == .phone, delay: 0.35, distance: -8, duration: 0.6)
     }
 }
