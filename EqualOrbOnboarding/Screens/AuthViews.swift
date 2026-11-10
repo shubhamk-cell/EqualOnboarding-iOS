@@ -130,7 +130,7 @@ struct OTPView: View {
                         Text(filled ? digits[i] : "")
                             .font(.dm(length > 4 ? 24 : 26, .semibold))
                             .foregroundStyle(EQ.ink)
-                            .frame(maxWidth: .infinity, minHeight: length > 4 ? 60 : 68)
+                            .frame(maxWidth: .infinity, minHeight: PrimaryButtonStyle.height)
                             .glass(RoundedRectangle(cornerRadius: length > 4 ? 16 : 18, style: .continuous), tint: 0.62,
                                    stroke: filled ? EQ.green : EQ.edge)
                             .popOnChange(of: filled)
@@ -145,12 +145,12 @@ struct OTPView: View {
                     HStack(spacing: 6) {
                         Text("+91 \(spaced)").font(.dm(15, .semibold)).foregroundStyle(EQ.ink)
                         Image(systemName: "pencil")
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(.system(size: 15, weight: .semibold))
                             .foregroundStyle(EQ.greenDeep)
-                            .frame(width: 26, height: 26)
-                            .background(Circle().fill(EQ.green.opacity(0.12)))
                     }
-                    .padding(.vertical, 6)
+                    // A full 44 pt tap target around the number and pencil.
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 8)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(PressStyle())
@@ -162,7 +162,7 @@ struct OTPView: View {
         } footer: {
             // Ready to tap once the code is in, in case verifying is ever slow.
             Button(verifying ? "Verifying…" : "Confirm") { model.confirmOTP() }
-                .buttonStyle(PrimaryButtonStyle(lookEnabled: verifying))
+                .buttonStyle(PrimaryButtonStyle(loading: verifying))
                 .disabled(digits.count < length)
                 .afterOrb(talk, index: 1)
         }
@@ -307,17 +307,16 @@ struct NameView: View {
         }
     }
 
-    /// As in the design: a tinted glass card, the name of the choice on top, a 3D bust rising
+    /// A neutral glass card: the name of the choice on top, a 3D bust rising
     /// from the bottom edge, and a faint ♂ / ♀ in the corner.
     private func genderCard(_ g: Gender) -> some View {
         let on = model.gender == g
         let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
         return Button { pick(g) } label: {
             ZStack {
-                shape.fill(Color(hex: g.fill))
+                GlassCardFace(shape: shape, on: on)
                 GenderMark(gender: g)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: g == .male ? .topLeading : .bottomLeading)
-                LinearGradient(colors: [.white.opacity(0.35), .white.opacity(0)], startPoint: .top, endPoint: .bottom)
                 VStack(spacing: 0) {
                     Text(g.label)
                         .font(.dm(17, .medium))
@@ -334,9 +333,8 @@ struct NameView: View {
             .frame(maxWidth: .infinity)
             .frame(height: 128)
             .clipShape(shape)
-            .background(shape.inset(by: -4).fill(EQ.green.opacity(on ? 0.14 : 0)))
-            .overlay(shape.strokeBorder(on ? EQ.green : EQ.edge, lineWidth: on ? 2 : 1))
-            .shadow(color: Color(hex: 0x1E2A6B).opacity(on ? 0.12 : 0.07), radius: 10, y: 5)
+            .overlay(shape.strokeBorder(on ? EQ.green : EQ.edge, lineWidth: on ? 1.5 : 1))
+            .selectableLift(on)
             // The chosen card keeps a tick on its corner, as the picks do.
             .overlay(alignment: .topTrailing) {
                 Image(systemName: "checkmark")
@@ -389,7 +387,7 @@ struct NameView: View {
 
 // MARK: - Shared input
 
-/// White 60 pt pill holding a field, with the screen's main action merged in as a round
+/// White 52 pt pill holding a field, with the screen's main action merged in as a round
 /// green send button at its right end. Gains a green rim once something is typed.
 struct InputPill<Field: View>: View {
     var filled: Bool
@@ -405,7 +403,7 @@ struct InputPill<Field: View>: View {
                 Image(systemName: "arrow.right")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(.white)
-                    .frame(width: 44, height: 44)
+                    .frame(width: 40, height: 40)
                     .background(Circle().fill(canSend ? EQ.green : Color(hex: 0xBFE6CB)))
                     .shadow(color: Color(hex: 0x008C32).opacity(canSend ? 0.3 : 0), radius: 6, y: 4)
             }
@@ -414,9 +412,9 @@ struct InputPill<Field: View>: View {
             .accessibilityLabel(sendLabel)
             .animation(.easeInOut(duration: 0.2), value: canSend)
         }
-        .padding(.leading, 22)
-        .padding(.trailing, 8)
-        .frame(height: 60)
+        .padding(.leading, 20)
+        .padding(.trailing, 6)
+        .frame(height: PrimaryButtonStyle.height)
         .background(Capsule().fill(.white))
         .background(Capsule().inset(by: -3).fill(EQ.green.opacity(filled ? 0.12 : 0)))
         .overlay(Capsule().strokeBorder(filled ? EQ.green : EQ.edge, lineWidth: filled ? 1.5 : 1))
@@ -431,7 +429,8 @@ struct GenderMark: View {
     var gender: Gender
 
     var body: some View {
-        let colour = Color(hex: gender.mark)
+        // Neutral on every card: the shape alone says which is which.
+        let colour = EQ.ink
         Canvas { ctx, _ in
             if gender == .male {
                 var arrow = Path()
@@ -453,7 +452,7 @@ struct GenderMark: View {
             }
         }
         .frame(width: gender == .male ? 95 : 109, height: gender == .male ? 103 : 118.5)
-        .opacity(gender == .male ? 0.1 : 0.16)
+        .opacity(0.05)
         .offset(gender == .male ? CGSize(width: -22, height: -10) : CGSize(width: -30, height: 40))
         .allowsHitTesting(false)
         .accessibilityHidden(true)

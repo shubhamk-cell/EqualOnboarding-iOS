@@ -241,13 +241,13 @@ enum Catalog {
     static let curating = "Curating sample calls from your picks…"
     /// V8, on the name screen once the name is in.
     static func genderAsk(_ name: String) -> String {
-        "Nice to meet you, \(name)! What’s your gender? I’ll use it to address you on calls"
+        "Nice to meet you, \(name)! What’s your gender?"
     }
     /// V8's picks: exactly three, and they turn into sample calls on the spot. Only a glimpse:
     /// the line says Equal takes all calls, so nobody thinks the three limit it.
     /// V8, after the sample calls.
     static let assistantAsk = "Now that you’ve seen me in action, how would you like me to\u{00A0}sound?"
-    static let pickThree = "I can handle all your calls. Select any 3 to get a\u{00A0}glimpse"
+    static let pickThree = "Select any 3 to get a glimpse of how I handle all your\u{00A0}calls"
     /// Said over the sample-call cards; counts the picks shown (up to three). “top 3 picks” is
     /// joined with non-breaking spaces so it never splits across lines.
     static func curated(_ count: Int) -> String {
@@ -305,15 +305,15 @@ enum Catalog {
         listenTitle: [.hi: "देखिए, आपके रोज़ के कॉल पर मैं कैसे काम करती हूँ",
                       .ta: "உங்கள் அன்றாட அழைப்புகளில் நான் செயல்படுவதைப் பாருங்கள்",
                       .bn: "আপনার রোজকার কলে আমাকে কাজ করতে দেখুন"],
-        genderAsk("{name}"): [.hi: "आपसे मिलकर अच्छा लगा, {name}! आपका जेंडर क्या है? कॉल पर आपको उसी हिसाब से संबोधित करूँगी",
-                              .ta: "உங்களைச் சந்தித்ததில் மகிழ்ச்சி, {name}! உங்கள் பாலினம் என்ன? அழைப்புகளில் உங்களை அப்படியே குறிப்பிடுவேன்",
-                              .bn: "আপনার সঙ্গে আলাপ করে ভালো লাগল, {name}! আপনার লিঙ্গ কী? কলে আপনাকে সেভাবেই সম্বোধন করব"],
+        genderAsk("{name}"): [.hi: "आपसे मिलकर अच्छा लगा, {name}! आपका जेंडर क्या है?",
+                              .ta: "உங்களைச் சந்தித்ததில் மகிழ்ச்சி, {name}! உங்கள் பாலினம் என்ன?",
+                              .bn: "আপনার সঙ্গে আলাপ করে ভালো লাগল, {name}! আপনার লিঙ্গ কী?"],
         assistantAsk: [.hi: "अब आपने मुझे काम करते देख लिया, बताइए मेरी आवाज़ कैसी हो?",
                        .ta: "என்னைச் செயலில் பார்த்துவிட்டீர்கள், என் குரல் எப்படி இருக்க வேண்டும்?",
                        .bn: "আমাকে কাজ করতে দেখলেন, এবার বলুন আমার গলা কেমন হবে?"],
-        pickThree: [.hi: "मैं आपके सारे कॉल संभाल सकती हूँ। एक झलक के लिए कोई भी 3 चुनिए",
-                    .ta: "உங்கள் எல்லா அழைப்புகளையும் நான் கவனிப்பேன். ஒரு பார்வைக்கு ஏதேனும் 3-ஐத் தேர்ந்தெடுங்கள்",
-                    .bn: "আপনার সব কল আমি সামলাতে পারি। এক ঝলক দেখতে যেকোনো ৩টে বেছে নিন"],
+        pickThree: [.hi: "कोई भी 3 चुनिए और झलक देखिए कि मैं आपके सारे कॉल कैसे संभालती हूँ",
+                    .ta: "ஏதேனும் 3-ஐத் தேர்ந்தெடுங்கள், உங்கள் அழைப்புகளை நான் எப்படிக் கவனிப்பேன் என்று பாருங்கள்",
+                    .bn: "যেকোনো ৩টে বেছে নিন, দেখুন আপনার সব কল আমি কীভাবে সামলাই"],
         title(.welcome, name: "{name}"): [.hi: "Equal में आपका स्वागत है, {name}!",
                                           .ta: "Equal-க்கு வரவேற்கிறோம், {name}!",
                                           .bn: "Equal-এ স্বাগতম, {name}!"],

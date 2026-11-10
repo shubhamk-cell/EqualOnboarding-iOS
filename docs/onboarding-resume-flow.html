@@ -1,0 +1,248 @@
+<title>Onboarding Resume Rules</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one reading column; the step table is the centrepiece, rules and edge cases follow. */
+  :root {
+    --bg: #ffffff;
+    --surface: #f4f8f5;
+    --ink: #0b1f12;
+    --muted: #4e5f54;
+    --line: #dde6df;
+    --green: #00843a;
+    --green-soft: #e3f5e9;
+    --amber: #8a5a00;
+    --amber-soft: #fff1d6;
+    --blue: #1f5fb8;
+    --blue-soft: #e4eefc;
+    --grey-soft: #eef1ef;
+    --display: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+    --body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1410; --surface: #141f18; --ink: #e8f1eb; --muted: #9fb2a6; --line: #24342a;
+      --green: #4cd486; --green-soft: #173524; --amber: #f0c060; --amber-soft: #3a2c10;
+      --blue: #8bb6ff; --blue-soft: #18253c; --grey-soft: #1c2620; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1410; --surface: #141f18; --ink: #e8f1eb; --muted: #9fb2a6; --line: #24342a;
+    --green: #4cd486; --green-soft: #173524; --amber: #f0c060; --amber-soft: #3a2c10;
+    --blue: #8bb6ff; --blue-soft: #18253c; --grey-soft: #1c2620; color-scheme: dark;
+  }
+
+  body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+  .page {
+    max-width: 960px; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 48px 72px;
+    display: flex; flex-direction: column; gap: 44px;
+  }
+  header { display: flex; flex-direction: column; gap: 12px; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green); }
+  h1 { font-family: var(--display); font-size: clamp(30px, 5vw, 42px); line-height: 1.1; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+  h2 { font-size: 22px; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+  p { margin: 0; max-width: 68ch; }
+  .lede { font-size: 18px; color: var(--muted); }
+  section { display: flex; flex-direction: column; gap: 16px; }
+
+  .rule {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px 22px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .rule strong { font-size: 18px; }
+  .rule p { color: var(--muted); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 14px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+
+  .chip {
+    display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+    padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+  }
+  .chip.restart { background: var(--grey-soft); color: var(--muted); }
+  .chip.here { background: var(--green-soft); color: var(--green); }
+  .chip.check { background: var(--blue-soft); color: var(--blue); }
+  .chip.skip { background: var(--amber-soft); color: var(--amber); }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; }
+  table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; background: var(--surface); }
+  tr:last-child td { border-bottom: none; }
+  td.n { font-variant-numeric: tabular-nums; color: var(--muted); width: 32px; }
+  td.step { font-weight: 600; width: 170px; }
+  td .then { display: block; margin-top: 6px; color: var(--muted); font-size: 14px; }
+  code { font-family: var(--mono); font-size: 0.88em; background: var(--grey-soft); padding: 1px 6px; border-radius: 6px; }
+  .auth-divider td {
+    background: var(--green-soft); color: var(--green); font-size: 13px; font-weight: 600;
+    padding: 8px 16px; letter-spacing: 0.02em;
+  }
+
+  .diagram { border: 1px solid var(--line); border-radius: 14px; padding: 20px; overflow-x: auto; background: var(--surface); }
+  .diagram pre { margin: 0; }
+
+  .cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .case { border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .case h3 { margin: 0; font-size: 16px; }
+  .case p { color: var(--muted); font-size: 15px; }
+
+  .bubble {
+    align-self: flex-start; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 18px 18px 18px 6px; padding: 12px 16px; font-weight: 500;
+  }
+  footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 18px; }
+</style>
+
+<div class="page">
+  <header>
+    <div class="eyebrow">Equal AI · iOS onboarding (V8)</div>
+    <h1>Where onboarding resumes after the app closes</h1>
+    <p class="lede">What happens when someone closes or loses the app at each onboarding step, what gets saved, and which screen they see when they open it again.</p>
+  </header>
+
+  <section>
+    <div class="rule">
+      <strong>The rule</strong>
+      <p>Resume at the first step whose outcome isn’t saved. Save every answer the moment it’s given: on the server, with a local copy for offline launches. For anything iOS controls (permissions), check the real state on launch instead of trusting a saved flag.</p>
+      <p>Nothing is saved on the server until OTP is verified, so closing before that starts again from the phone number.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Step by step</h2>
+    <div class="legend">
+      <span><i class="chip restart">Start again</i> back to an earlier screen</span>
+      <span><i class="chip here">Resume here</i> reopen this screen</span>
+      <span><i class="chip check">Re-check iOS</i> decide from the system’s state</span>
+      <span><i class="chip skip">Skip</i> already done, move on</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Step</th><th>Saved when finished</th><th>App closed during this step → reopens at</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="n">1</td><td class="step">Splash</td><td>—</td>
+            <td><span class="chip restart">Start again</span><span class="then">Splash, then Phone.</span></td>
+          </tr>
+          <tr>
+            <td class="n">2</td><td class="step">Phone number</td><td>Number kept on the device only, as a draft</td>
+            <td><span class="chip here">Resume here</span><span class="then">Phone, with the number already filled in.</span></td>
+          </tr>
+          <tr>
+            <td class="n">3</td><td class="step">OTP</td><td>Session token and account (the server now knows the user)</td>
+            <td><span class="chip restart">Start again</span><span class="then">Phone, number filled in. Never reopen on OTP: the code may have expired, and “Send OTP” is one tap.</span></td>
+          </tr>
+          <tr class="auth-divider"><td colspan="4">After OTP: every answer below is saved to the account as soon as it’s given</td></tr>
+          <tr>
+            <td class="n">4</td><td class="step">Name</td><td><code>name</code></td>
+            <td><span class="chip here">Resume here</span><span class="then">Name, with any half-typed text discarded.</span></td>
+          </tr>
+          <tr>
+            <td class="n">5</td><td class="step">Gender (same page as name)</td><td><code>gender</code></td>
+            <td><span class="chip here">Resume here</span><span class="then">Name page in its gender state. The orb asks the gender question and “Edit name” stays available.</span></td>
+          </tr>
+          <tr>
+            <td class="n">6</td><td class="step">Pick 3 → sample calls</td><td><code>picks</code> (used to personalise, not required)</td>
+            <td><span class="chip here">Resume here</span><span class="then">Pick 3 with nothing selected. The sample calls are a demo: replay them, don’t resume mid-call. Once someone has moved past this step, it never shows again.</span></td>
+          </tr>
+          <tr>
+            <td class="n">7</td><td class="step">Assistant voice</td><td><code>voice</code></td>
+            <td><span class="chip here">Resume here</span><span class="then">Voice page with nothing selected, and the button disabled until a voice is picked. Already chosen: skip.</span></td>
+          </tr>
+          <tr>
+            <td class="n">8</td><td class="step">Permissions (notifications, contacts)</td><td>Nothing saved: read iOS’s current status</td>
+            <td><span class="chip check">Re-check iOS</span><span class="then">Both granted: skip. Not yet asked: Permissions. Denied: move on, and nudge later from Home.</span></td>
+          </tr>
+          <tr>
+            <td class="n">9</td><td class="step">Call forwarding</td><td><code>forwardingConfirmed</code>, set when “I have activated call forwarding” is ticked</td>
+            <td><span class="chip here">Resume here</span><span class="then">If they left to dial the code, reopen in the “came back” state with the confirmation tick showing, not from the start. Already confirmed: skip.</span></td>
+          </tr>
+          <tr>
+            <td class="n">10</td><td class="step">Voicemail settings</td><td><code>voicemailVisited</code>, set on return from Settings</td>
+            <td><span class="chip here">Resume here</span><span class="then">Not visited yet: Voicemail. Visited: skip. The app can’t read this setting, so a visit counts as done.</span></td>
+          </tr>
+          <tr>
+            <td class="n">11</td><td class="step">Welcome</td><td><code>onboardingCompleted</code>, set when Welcome appears</td>
+            <td><span class="chip skip">Skip</span><span class="then">Home, without replaying the celebration.</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>On launch</h2>
+    <div class="diagram">
+<pre class="mermaid">
+flowchart TD
+  A[App opens] --> B{Signed in?}
+  B -- No --> P[Phone screen<br/>number filled in if drafted]
+  B -- Yes --> C{onboardingCompleted?}
+  C -- Yes --> H[Home]
+  C -- No --> D[Read saved answers<br/>server first, local copy if offline]
+  D --> E{First missing answer}
+  E -- name --> N[Name]
+  E -- gender --> G[Name page, gender state]
+  E -- picks --> K[Pick 3, nothing selected]
+  E -- voice --> V[Voice, nothing selected]
+  E -- none of these --> R{iOS permissions granted?}
+  R -- Not asked --> PM[Permissions]
+  R -- Granted or denied --> F{Forwarding confirmed?}
+  F -- No --> FW[Call forwarding]
+  F -- Yes --> VM{Voicemail visited?}
+  VM -- No --> VS[Voicemail]
+  VM -- Yes --> W[Welcome]
+</pre>
+    </div>
+  </section>
+
+  <section>
+    <h2>Coming back</h2>
+    <p>On every resume, the orb greets the person first, then asks the current step’s question. The rest of the page waits for that message, as everywhere in onboarding.</p>
+    <div class="bubble">Welcome back, Shubham — let’s pick up where we left off</div>
+  </section>
+
+  <section>
+    <h2>Edge cases</h2>
+    <div class="cases">
+      <div class="case">
+        <h3>Closed while in Phone or Settings</h3>
+        <p>If iOS ends the app while someone is dialling the forwarding code or changing voicemail settings, treat it as “came back”. These are the most common closes, and nobody should redo the step.</p>
+      </div>
+      <div class="case">
+        <h3>Logged out or session expired</h3>
+        <p>Back to Phone. The answers stay on the account, so after OTP they land on the first unanswered step.</p>
+      </div>
+      <div class="case">
+        <h3>Deleted and reinstalled</h3>
+        <p>After OTP the server’s record wins. They resume at the same step and never see completed steps again.</p>
+      </div>
+      <div class="case">
+        <h3>Offline on launch</h3>
+        <p>Use the local copy of the saved answers. Steps that need the network wait with a retry rather than sending people backwards.</p>
+      </div>
+      <div class="case">
+        <h3>App updated with a new step</h3>
+        <p>Someone who already finished onboarding sees only the new step, then Home. Someone mid-way sees it in its place in the flow.</p>
+      </div>
+      <div class="case">
+        <h3>Answer saved, network failed</h3>
+        <p>Keep the answer locally and move on. Send it to the server on the next launch or when the connection returns.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>In the production app</h2>
+    <p>The Equal AI app already asks its backend for onboarding status on every launch, at <code>GET /api/v2/flows/onboarding/status</code>. That response is the natural home for “which step is next”, so the app only needs a step-to-screen mapping plus the iOS permission check.</p>
+  </section>
+
+  <footer>Applies to the V8 onboarding: phone → OTP → name and gender → pick 3 → voice → permissions → call forwarding → voicemail → welcome.</footer>
+</div>

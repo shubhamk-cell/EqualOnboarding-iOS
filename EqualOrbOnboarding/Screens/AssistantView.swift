@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// V8, after the sample calls: “Now that you’ve seen me in action, how would you like me to
-/// sound?” Four voices in a 2×2 grid, two female and two male, each card tinted and marked ♀ / ♂ like the gender cards.
+/// sound?” Four voices in a 2×2 grid, two female and two male, on neutral glass cards marked ♀ / ♂ like the gender cards.
 /// Tapping a card picks that voice and plays its hello; the way on appears once one is picked.
 struct AssistantView: View {
     @EnvironmentObject var model: AppModel
@@ -78,23 +78,21 @@ struct AssistantView: View {
         let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
         let gender: Gender = v.isFemale ? .female : .male
         return Button { pick(v) } label: {
-            // Styled like the gender cards: a pale tint, a soft top sheen and a faint ♀ / ♂ behind.
+            // Styled like the gender cards: neutral glass and a faint ♀ / ♂ behind.
             ZStack {
-                shape.fill(Color(hex: gender.fill))
+                GlassCardFace(shape: shape, on: on)
                 // In the lower-right corner, whole enough to read as ♀ (ring and cross) or ♂
                 // (ring and arrow), just cut by the edge.
                 GenderMark(gender: gender)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                     .offset(x: v.isFemale ? 38 : 30, y: v.isFemale ? -32 : 22)
-                LinearGradient(colors: [.white.opacity(0.35), .white.opacity(0)], startPoint: .top, endPoint: .bottom)
                 content(v, on: on, speaking: speaking)
             }
             .frame(maxWidth: .infinity)
             .frame(height: 148)
             .clipShape(shape)
-            .background(shape.inset(by: -4).fill(EQ.green.opacity(on ? 0.14 : 0)))
-            .overlay(shape.strokeBorder(on ? EQ.green : EQ.edge, lineWidth: on ? 2 : 1))
-            .shadow(color: Color(hex: 0x1E2A6B).opacity(on ? 0.12 : 0.07), radius: 10, y: 5)
+            .overlay(shape.strokeBorder(on ? EQ.green : EQ.edge, lineWidth: on ? 1.5 : 1))
+            .selectableLift(on)
             .overlay(alignment: .topTrailing) {
                 CheckBadge(on: on).offset(x: 6, y: -6)
             }

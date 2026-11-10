@@ -104,12 +104,13 @@ struct Orb: View {
                 let raw = (t - Double(i) * 1.4).truncatingRemainder(dividingBy: 4.2) / 4.2
                 let p = raw < 0 ? raw + 1 : raw
                 let e = bezierEase(p, 0.2, 0.6, 0.3, 1)
-                let a = p < 0.12 ? 0.42 * (p / 0.12) : 0.42 * (1 - (p - 0.12) / 0.88)
+                let a = p < 0.12 ? (p / 0.12) : (1 - (p - 0.12) / 0.88)
+                // A thin green ring on the light page: there, but quiet.
                 Circle()
-                    .stroke(Color.white.opacity(0.5), lineWidth: 1)
+                    .stroke(EQ.green.opacity(0.18), lineWidth: 1 - 0.4 * e)
                     .frame(width: diameter, height: diameter)
                     .scaleEffect(1 + 0.42 * e)
-                    .opacity(a)
+                .opacity(a)
             }
         }
         .allowsHitTesting(false)

@@ -178,7 +178,7 @@ struct InstructView: View {
                 }
                 .padding(.leading, 18)
                 .padding(.trailing, 8)
-                .frame(minHeight: 56)
+                .frame(minHeight: PrimaryButtonStyle.height)
                 .background(Capsule().fill(.white))
                 .overlay(Capsule().strokeBorder(EQ.green.opacity(0.5), lineWidth: 1.5))
             }
@@ -200,7 +200,7 @@ struct InstructView: View {
             Image(systemName: icon)
                 .font(.system(size: 18, weight: .medium))
                 .foregroundStyle(EQ.ink.opacity(0.55))
-                .frame(width: 56, height: 56)
+                .frame(width: PrimaryButtonStyle.height, height: PrimaryButtonStyle.height)
                 .background(Circle().fill(.white))
                 .shadow(color: .black.opacity(0.06), radius: 6, y: 3)
         }
@@ -228,7 +228,7 @@ struct InstructView: View {
                     .transition(.opacity)
             }
         }
-        .frame(height: 56)
+        .frame(height: PrimaryButtonStyle.height)
         .scaleEffect(on ? 1.04 : 1)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: on)
         .contentShape(Capsule())

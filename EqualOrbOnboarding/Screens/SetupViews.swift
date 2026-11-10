@@ -198,18 +198,18 @@ struct ForwardingView: View {
                     .font(.dm(15, .semibold))
                     .foregroundStyle(light ? EQ.greenDeep : .white)
                     .padding(.horizontal, 18)
-                    .frame(height: 44)
+                    .frame(height: 40)
                     .background(Capsule().fill(light ? EQ.mint : EQ.green))
                     .overlay(Capsule().strokeBorder(EQ.green.opacity(light ? 0.25 : 0), lineWidth: 1))
                     .contentTransition(.opacity)
                     .animation(.easeInOut(duration: 0.25), value: light)
             }
             .buttonStyle(PressStyle())
-            .background { if mode == .copy { SettingsGuideAnchor(guide: guide).frame(width: 36, height: 44) } }   // hidden behind the button
+            .background { if mode == .copy { SettingsGuideAnchor(guide: guide).frame(width: 28, height: 28) } }   // hidden behind the button, well inside its 40 pt height
         }
         .padding(.leading, 20)
-        .padding(.trailing, 8)
-        .frame(height: 54)
+        .padding(.trailing, 6)
+        .frame(height: PrimaryButtonStyle.height)
         .glass(Capsule(), tint: 0.62, shadow: false)
     }
 
@@ -337,7 +337,7 @@ struct VoicemailView: View {
                     if done { model.next() } else { Task { await openSettings() } }
                 }
                 .buttonStyle(PrimaryButtonStyle())
-                .background { SettingsGuideAnchor(guide: guide).frame(width: 36, height: 48) }   // hidden behind the button
+                .background { SettingsGuideAnchor(guide: guide).frame(width: 28, height: 28) }   // hidden behind the button, well inside its 52 pt height
                 // Back from Settings: a way to go round again, with the walkthrough.
                 if done {
                     Button { Task { await openSettings() } } label: {

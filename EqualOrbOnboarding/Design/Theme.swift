@@ -107,22 +107,37 @@ extension View {
 
 // MARK: - Buttons
 
-/// Big green pill (60pt). Disabled: washed-out green, no shadow.
+/// The large, full-width button from the design system: 52pt capsule, 18pt semibold label.
+/// Disabled: light grey with a grey label, the whole button at half opacity. Loading: the same
+/// grey, with a spinner before the label (“Verifying…”, “Connecting…”).
 struct PrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) var enabled
-    var lookEnabled = false
+    var loading = false
+
+    static let height: CGFloat = 52
+
     func makeBody(configuration: Configuration) -> some View {
-        let on = enabled || lookEnabled
-        configuration.label
-            .font(.dm(18, .semibold))
-            .tracking(-0.18)
-            .foregroundStyle(.white.opacity(on ? 1 : 0.75))
-            .frame(maxWidth: .infinity, minHeight: 60)
-            .background(Capsule().fill(on ? EQ.green : EQ.green.opacity(0.38)))
-            .shadow(color: Color(hex: 0x00782D).opacity(on ? 0.3 : 0), radius: 12, y: 10)
-            .scaleEffect(configuration.isPressed ? 0.97 : 1)
-            .animation(.easeOut(duration: 0.18), value: configuration.isPressed)
-            .animation(.easeInOut(duration: 0.25), value: on)
+        let on = enabled && !loading
+        HStack(spacing: 8) {
+            if loading {
+                ProgressView()
+                    .controlSize(.small)
+                    .tint(Color(hex: 0x888888))
+                    .transition(.opacity.combined(with: .scale(scale: 0.6)))
+            }
+            configuration.label
+        }
+        .font(.dm(18, .semibold))
+        .tracking(-0.026 * 18)
+        .foregroundStyle(on ? Color(hex: 0xF7F7F7) : Color(hex: 0x888888))
+        .frame(maxWidth: .infinity, minHeight: Self.height)
+        .background(Capsule().fill(on ? EQ.green : Color(hex: 0xDDDDDD)))
+        .opacity(on ? 1 : 0.5)
+        .shadow(color: Color(hex: 0x00782D).opacity(on ? 0.3 : 0), radius: 12, y: 10)
+        .scaleEffect(configuration.isPressed && on ? 0.97 : 1)
+        .animation(.easeOut(duration: 0.18), value: configuration.isPressed)
+        .animation(.easeInOut(duration: 0.25), value: on)
+        .animation(.easeInOut(duration: 0.25), value: loading)
     }
 }
 
@@ -300,5 +315,34 @@ struct Wordmark: View {
             .aspectRatio(480 / 101, contentMode: .fit)
             .frame(height: height)
             .accessibilityLabel("equal ai")
+    }
+}
+
+// MARK: - Selectable glass cards
+
+/// The neutral, slightly glassy face of a choice card (gender, voice, picks): frosted white over
+/// the page's glows, a soft sheen from the top, and a hairline edge. Picked, it tints faint mint
+/// and the edge turns green.
+struct GlassCardFace<S: InsettableShape>: View {
+    var shape: S
+    var on: Bool
+
+    var body: some View {
+        ZStack {
+            shape.fill(.ultraThinMaterial)
+            shape.fill(on ? EQ.mintAlt.opacity(0.75) : Color.white.opacity(0.55))
+            shape.fill(LinearGradient(colors: [.white.opacity(0.7), .white.opacity(0)],
+                                      startPoint: .top, endPoint: .center))
+        }
+    }
+}
+
+extension View {
+    /// A card's lift: a faint neutral shadow, and, once picked, a wide, soft green glow underneath
+    /// instead of a hard halo around the edge.
+    func selectableLift(_ on: Bool) -> some View {
+        self
+            .shadow(color: Color(hex: 0x0B1F12).opacity(on ? 0.04 : 0.06), radius: 10, y: 5)
+            .shadow(color: EQ.green.opacity(on ? 0.16 : 0), radius: 18, y: 8)
     }
 }

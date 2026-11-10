@@ -1,10 +1,10 @@
 import SwiftUI
 import AVFoundation
 
-/// V8's picks: “Pick any 3”, with no Skip and no Continue. The third pick sets everything off on
+/// V8's picks: “Select any 3”. Continue turns on at the third pick and sets everything off on
 /// the same page: the other options fade, the three gather at the top and shimmer while the orb
 /// curates, then each turns into a voice note: its fill shrinks into the note's cover, its emoji
-/// and name glide into place, and its player unrolls underneath. Continue arrives after.
+/// and name glide into place, and its player unrolls underneath. The way on unlocks once at least one call has been played.
 struct PickThreeView: View {
     @EnvironmentObject var model: AppModel
     @StateObject private var talk = Talk()
@@ -27,6 +27,8 @@ struct PickThreeView: View {
     @State private var lengths: [String: Double] = [:]
     @State private var showOptions = false
     @State private var revealed = false
+    /// At least one sample call has been played, which unlocks the way on.
+    @State private var heard = false
 
     enum Phase { case picking, curating, ready }
 
@@ -57,12 +59,24 @@ struct PickThreeView: View {
                 Color.clear.frame(height: 150)
             }
 
-            if cardContent {
-                Button(model.nextCTA) {
+            if phase == .picking, revealed {
+                // Unlocks at the third pick; the picks are only turned into calls on tap.
+                Button("Continue") { startCurating() }
+                    .buttonStyle(PrimaryButtonStyle())
+                    .disabled(model.picks.count < Self.needed)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 8)
+                    .padding(.bottom, 8)
+                    .transition(.opacity.combined(with: .offset(y: 30)))
+            } else if cardContent {
+                // Listening to a call comes first; the label says so until one has been played.
+                Button(heard ? "Continue" : "Listen to a call to continue") {
                     player.stop()
                     model.next()
                 }
                 .buttonStyle(PrimaryButtonStyle())
+                .disabled(!heard)
+                .animation(.easeInOut(duration: 0.2), value: heard)
                 .padding(.horizontal, 24)
                 .padding(.top, 8)
                 .padding(.bottom, 8)
@@ -92,7 +106,7 @@ struct PickThreeView: View {
         guard (try? await Task.sleep(for: .seconds(0.45))) != nil else { return }
         withAnimation(OrbFlight.glide) { showOptions = true }
         guard (try? await Task.sleep(for: .seconds(0.12))) != nil else { return }
-        revealed = true
+        withAnimation(.easeOut(duration: 0.4).delay(0.3)) { revealed = true }
     }
 
     private var options: some View {
@@ -191,12 +205,11 @@ struct PickThreeView: View {
                     .opacity(letGo ? 0 : 1)
             }
             .padding(.horizontal, 10)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .background {
                 shape.fill(on ? EQ.mintAlt : .white.opacity(0.7))
                     .opacity(letGo ? 0 : 1)
             }
-            .background(shape.inset(by: -3).fill(EQ.green.opacity(on && !letGo ? 0.12 : 0)))
             // While curating, a sheen sweeps across the picks.
             .overlay {
                 if on && phase == .curating {
@@ -210,7 +223,7 @@ struct PickThreeView: View {
                 }
             }
             .overlay(shape.strokeBorder(on ? EQ.green : EQ.edge, lineWidth: on ? 1.5 : 1).opacity(letGo ? 0 : 1))
-            .shadow(color: Color(hex: on ? 0x00782D : 0x003214).opacity(letGo ? 0 : on ? 0.12 : 0.06), radius: on ? 7 : 6, y: on ? 6 : 4)
+            .selectableLift(on && !letGo)
             .overlay(alignment: .topTrailing) {
                 // The pick's number (1, 2, 3) in the order it was picked, rather than a tick.
                 Text("\((model.picks.firstIndex(of: u.id) ?? 0) + 1)")
@@ -251,7 +264,11 @@ struct PickThreeView: View {
         withAnimation(.easeInOut(duration: 0.2)) {
             if model.picks.contains(u.id) { model.picks.removeAll { $0 == u.id } } else { model.picks.append(u.id) }
         }
-        if model.picks.count == Self.needed { curating = Task { await curate() } }
+    }
+
+    private func startCurating() {
+        guard phase == .picking, model.picks.count == Self.needed else { return }
+        curating = Task { await curate() }
     }
 
     // MARK: Curating
@@ -261,7 +278,7 @@ struct PickThreeView: View {
         curating?.cancel()
         player.stop()
         var still = Transaction(); still.disablesAnimations = true
-        withTransaction(still) { shimmer = false; handing = false; cardContent = false }
+        withTransaction(still) { shimmer = false; handing = false; cardContent = false; heard = false }
         withAnimation(.spring(response: 0.55, dampingFraction: 0.86)) {
             expanded = false
             rearranged = false
@@ -275,9 +292,7 @@ struct PickThreeView: View {
     }
 
     private func curate() async {
-        // A beat to see the third tick land (and to untick it, if it was a slip).
-        guard (try? await Task.sleep(for: .seconds(0.55))) != nil,
-              model.picks.count == Self.needed, phase == .picking else { return }
+        guard model.picks.count == Self.needed, phase == .picking else { return }
         Haptics.step()
         phase = .curating
         await talk.clear()
@@ -424,6 +439,7 @@ struct PickThreeView: View {
 
     private func play(_ u: UseCase) {
         Haptics.select()
+        heard = true
         if player.id == u.id {
             if player.playing { player.pause() } else { player.play() }
             return
