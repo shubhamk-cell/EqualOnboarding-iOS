@@ -106,13 +106,15 @@ struct SettingsGuideAnchor: UIViewRepresentable {
 
 // MARK: - Where the guide lives
 
-/// A step's walkthrough marks its frame with this, and the root view draws the guide's player
-/// there, beneath the opaque sky: on screen as PiP requires, never seen, and the PiP window grows
-/// out of the walkthrough and shrinks back into it.
+/// A step's walkthrough marks its frame with this, and the root view draws the guide's (tiny)
+/// player in its middle, beneath the opaque sky: on screen as PiP requires, never seen, and the
+/// PiP window grows out of the walkthrough and shrinks away into it.
 struct GuideSlot: Identifiable {
     let guide: SettingsGuide
     let bounds: Anchor<CGRect>
     var id: ObjectIdentifier { ObjectIdentifier(guide) }
+    /// The player's size: small enough that PiP comes and goes as a point.
+    static let size: CGFloat = 28
 }
 
 struct GuideSlotKey: PreferenceKey {
@@ -127,9 +129,11 @@ extension View {
             GeometryReader { proxy in
                 ForEach(slots) { slot in
                     let r = proxy[slot.bounds]
+                    // Tiny, as it was behind the CTA, so PiP shrinks smaller and smaller into the
+                    // heart of the walkthrough (a little above centre: its bottom fades out) and is gone.
                     SettingsGuideAnchor(guide: slot.guide)
-                        .frame(width: r.width, height: r.height)
-                        .position(x: r.midX, y: r.midY)
+                        .frame(width: GuideSlot.size, height: GuideSlot.size)
+                        .position(x: r.midX, y: r.minY + r.height * 0.42)
                 }
             }
             .allowsHitTesting(false)
