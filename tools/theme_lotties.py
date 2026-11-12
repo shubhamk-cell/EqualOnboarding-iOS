@@ -1,20 +1,25 @@
 #!/usr/bin/env python3
-"""Builds themed dotLottie files (docs/lottie/*.lottie) from the app's two setup Lotties.
+"""Builds the themed dotLottie files for the two setup steps (docs/lottie/*.lottie).
 
-Each colour gets a slot named for the screen it sits on, so a theme can colour Equal's own
-screens with Equal's alias tokens (Figma "Colour Guide — Alias Tokens") and the iOS screens
-(Phone keypad, Settings) with iOS's own light/dark system colours. Some parts stay as drawn in
-both themes: the home screen (wallpaper and app icons), the carrier's reply (already a dark
-system sheet), the brand gradients and the phone itself.
+- forwarding.lottie: the build's call-forwarding walkthrough (copy flow), drawn into the
+  voicemail Lottie's phone by tools/build_forwarding_lottie.py.
+- voicemail.lottie: the app's voicemail.json, with each colour slot renamed for the screen it
+  sits on.
+
+Equal's own screens, tips and highlights take Equal's alias tokens (Figma "Colour Guide — Alias
+Tokens"); iOS screens (Phone keypad, Settings, status bar) take iOS's own light/dark colours.
+Some parts stay as drawn in both themes: the home screen (wallpaper and app icons), the
+carrier's reply (already a dark system sheet), the finger marks, the green done tick and the
+phone itself.
 
 Slot prefixes:
-  equal_*     Equal app screens and Equal's own tips/highlights → Equal alias tokens
-  iosPhone_*  the Phone app keypad                              → iOS system colours
-  iosAlert_*  the carrier's reply sheet                         → left as drawn (no rules)
-  ios_*       iOS Settings pages (voicemail)                    → iOS system colours
+  equal_*     Equal's screens, tips and highlights → Equal alias tokens
+  iosPhone_*  the Phone app keypad                 → iOS system colours
+  ios_*       iOS Settings pages and status bar    → iOS system colours
 
 Each file has two themes, "light" and "dark"; "light" is the initial one. The app itself plays
-the plain JSONs (Lottie for iOS ignores slots), so this only produces files to share.
+voicemail.json and draws the forwarding walkthrough in SwiftUI (Lottie for iOS ignores slots),
+so this only produces files to share. Run from the repo root:
 
     python3 tools/theme_lotties.py
 """
@@ -45,7 +50,10 @@ EQ = {
     'text/secondary': ('#555555', '#BBBBBB'),
     'text/placeholder': ('#AAAAAA', '#777777'),
     'text/action': ('#00B140', '#BAFF29'),
+    'text/on-action': ('#FFFFFF', '#000000'),
     'text/on-action-disabled': ('#888888', '#888888'),
+    'chat-bubble/user-bg': ('#E8FFED', '#1E2C22'),
+    'chat-bubble/user-title': ('#006223', '#BBFF9C'),
     'button/primary': ('#00B140', '#BAFF29'),
     'button/disabled': ('#DDDDDD', '#444444'),
     'grey08': ('#888888', '#888888'),
@@ -60,111 +68,33 @@ def tok(name):
 
 # ---------------------------------------------------------------- forwarding
 
-# Which precomp (asset id) or layer belongs to which screen.
-FWD_GROUPS = {
-    'asset:1552': 'equal',      # Equal's call-forwarding screen
-    'asset:227': 'equal',       # its "Use this code" card, lifted out
-    'asset:237': 'equal',       # the success badge
-    'layer:ROOT:233': 'equal',  # the badge's tick
-    'asset:1974': 'iosPhone',   # Phone keypad
-    'asset:506': 'iosPhone',    # the pasted code on the keypad
-    'asset:416': 'iosAlert',    # the carrier's reply
-    'layer:1981:242': None,     # phone hardware / masks: not themable
-    'layer:1981:1980': None,
-    'layer:1977:1555': None,
-}
-
+# Built by tools/build_forwarding_lottie.py (the build's walkthrough in the voicemail phone), with
+# its colours already in named slots.
 FWD_THEME = {
-    # Equal screen
     'equal_screenBg': tok('bg/primary'),
     'equal_surface': tok('bg/surface'),
     'equal_textPrimary': tok('text/primary'),
     'equal_textSecondary': tok('text/secondary'),
-    'equal_textTertiary': ('#888888', '#888888'),
-    'equal_textQuaternary': tok('text/placeholder'),
-    'equal_brandPrimary': tok('button/primary'),
-    'equal_skeleton': tok('button/disabled'),
-    'equal_skeletonAlt': tok('button/disabled'),
-    'equal_skeletonDeep': tok('grey12'),
-    'equal_neutralLight': tok('grey11'),
-    'equal_ctaLabel': tok('text/on-action-disabled'),
-    'equal_surfaceMuted': tok('button/disabled'),
-    'equal_tintBlue': ('#DFECFF', '#1B2633'),
-    'equal_tintYellow': ('#FFFCAF', '#33321C'),
-    # iOS Phone keypad: iOS light as drawn, iOS dark.
-    'iosPhone_surface': ('#FFFFFF', '#000000'),
-    'iosPhone_textPrimary': ('#000000', '#FFFFFF'),
-    'iosPhone_keypadKey': ('#E2E2E2', '#333333'),
-    'iosPhone_keypadSurface': ('#E6E6E6', '#2C2C2E'),
-    'iosPhone_neutral': ('#A3A3A3', '#8E8E93'),
-    'iosPhone_neutralLight': ('#B8B8B8', '#48484A'),
-    'iosPhone_textTertiary': ('#858484', '#8E8E93'),
-    'iosPhone_textQuaternary': ('#929292', '#636366'),
-    'iosPhone_systemBlue': ('#216ED6', '#0A84FF'),
-    'iosPhone_successFill': ('#31C75C', '#30D158'),
-    'iosPhone_tintBlue': ('#DFECFF', '#0A2440'),
-    'iosPhone_tintYellow': ('#FFFCAF', '#3A3510'),
+    'equal_strokeSubtle': ('#000000', '#FFFFFF'),          # stroke/subtle, drawn at 6 %
+    'equal_action': tok('button/primary'),
+    'equal_onAction': tok('text/on-action'),
+    'equal_actionSoft': tok('chat-bubble/user-bg'),         # "Copied": soft green
+    'equal_onActionSoft': tok('chat-bubble/user-title'),
+    # iOS: light as iOS draws it, and iOS dark.
+    'iosPhone_bg': ('#FFFFFF', '#000000'),
+    'iosPhone_key': ('#E5E5EA', '#333333'),
+    'iosPhone_label': ('#000000', '#FFFFFF'),
+    'iosPhone_call': ('#34C759', '#30D158'),
+    'ios_statusBar': ('#000000', '#FFFFFF'),
 }
 
 
-def fwd_gradient_rules():
-    """The Equal screen's bottom scrim fades into the screen colour."""
-    rules = {}
-    for theme, (r, g, b, _) in (('light', hx(EQ['bg/primary'][0])), ('dark', hx(EQ['bg/primary'][1]))):
-        rules[theme] = [{'id': 'equal_gradientScrim', 'type': 'Gradient',
-                         'value': [{'color': [r, g, b, 0], 'offset': 0},
-                                   {'color': [r, g, b, 1], 'offset': 0.044}]}]
-    return rules
-
-
-def split_forwarding(d):
-    assets = {a['id']: a for a in d['assets']}
-    base = d['slots']
-    used = {}
-
-    def rename(o, g):
-        if isinstance(o, dict):
-            if isinstance(o.get('sid'), str):
-                old = o['sid']
-                if g is None:
-                    del o['sid']
-                else:
-                    o['sid'] = f'{g}_{old}'
-                    used[o['sid']] = old
-            for k, v in o.items():
-                if k != 'refId':
-                    rename(v, g)
-        elif isinstance(o, list):
-            for v in o:
-                rename(v, g)
-
-    done = set()
-
-    def visit(layers, owner, g):
-        for l in layers:
-            key = f'layer:{owner}:{l.get("ind")}'
-            lg = FWD_GROUPS[key] if key in FWD_GROUPS else g
-            aid = l.get('refId')
-            if aid in assets and 'layers' in assets[aid]:
-                rename(l, lg)
-                if aid in done:
-                    continue
-                done.add(aid)
-                ak = f'asset:{aid}'
-                visit(assets[aid]['layers'], aid, FWD_GROUPS[ak] if ak in FWD_GROUPS else lg)
-            else:
-                rename(l, lg)
-
-    visit(d['layers'], 'ROOT', None)
-    missing = [k for k in used if k.startswith(('equal_', 'iosPhone_')) and k not in FWD_THEME
-               and k not in ('equal_gradientScrim', 'equal_gradientBrand', 'equal_gradientSuccess')]
-    assert not missing, f'no theme value for {missing}'
-    d['slots'] = {new: copy.deepcopy(base[old]) for new, old in sorted(used.items())}
-    rules = fwd_gradient_rules()
-    for theme in ('light', 'dark'):
-        i = 0 if theme == 'light' else 1
-        rules[theme] = [{'id': s, 'type': 'Color', 'value': hx(v[i])}
-                        for s, v in FWD_THEME.items() if s in d['slots']] + rules[theme]
+def build_forwarding():
+    import build_forwarding_lottie
+    d = build_forwarding_lottie.build()
+    assert set(d['slots']) == set(FWD_THEME), set(d['slots']) ^ set(FWD_THEME)
+    rules = {theme: [{'id': s, 'type': 'Color', 'value': hx(v[i])} for s, v in FWD_THEME.items()]
+             for i, theme in enumerate(('light', 'dark'))}
     return d, rules
 
 
@@ -260,11 +190,11 @@ def pack(d, anim_id, rules, out):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    for name, split in (('forwarding', split_forwarding), ('voicemail', split_voicemail)):
-        with open(os.path.join(SRC, f'{name}.json')) as f:
-            d = json.load(f)
-        d, rules = split(d)
-        pack(d, name, rules, os.path.join(OUT, f'{name}.lottie'))
+    d, rules = build_forwarding()
+    pack(d, 'forwarding', rules, os.path.join(OUT, 'forwarding.lottie'))
+    with open(os.path.join(SRC, 'voicemail.json')) as f:
+        d, rules = split_voicemail(json.load(f))
+    pack(d, 'voicemail', rules, os.path.join(OUT, 'voicemail.lottie'))
 
 
 if __name__ == '__main__':
