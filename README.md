@@ -67,6 +67,9 @@ is heard (no mic permission, or the simulator), the instruction card on screen i
 - `Model/` – `AppModel` (steps, state, overlays) and `Catalog` (use cases, sample-call scripts, orb lines).
 - `Screens/` – splash, number/code/name, picks + sample-call cards, permissions/forwarding/voicemail, welcome, home.
 - `Overlays/` – consent dialog, decline sheet, carrier reply, Home's setup sheet, mock iPhone Settings.
+- `tools/` – renderers for the sample calls and the two PiP walkthrough videos, and `theme_lotties.py`, which builds
+  `docs/lottie/forwarding.lottie` and `voicemail.lottie`: the setup Lotties as dotLottie files with light and dark themes
+  (Equal's screens use Equal's alias tokens, iOS screens iOS's own colours; the home screen and carrier reply stay as drawn).
 
 Debug builds accept `-startStep <phone|otp|name|langVoice|cases|assistant|listen|instruct|permq|fwd|access|welcome|home>` (and `-variant v1…v8`) as a launch argument
 to jump straight to a screen. The shared scheme already lists `-startStep home` (unticked): *Product › Scheme ›

@@ -51,6 +51,8 @@ let label = Color.black
 let secondary = Color(white: 0.55)
 let iosGreen = Color(red: 0.204, green: 0.78, blue: 0.349)
 let equalGreen = Color(red: 0, green: 0.694, blue: 0.251)
+/// The border: Equal green at about 45 %, on white. Present, but soft.
+let frameGreen = Color(red: 0.55, green: 0.862, blue: 0.663)
 
 struct AppIcon: View {
     var symbol: String
@@ -169,21 +171,23 @@ struct Frame: View {
         let caption = captions.last { t >= $0.from }!
         let done = caption.step == "All set"
         VStack(spacing: 0) {
-            // Instruction banner
+            // Instruction banner: quiet, so the steps below stay the focus. White, a green glyph,
+            // dark text, and a hairline to the phone.
             HStack(spacing: 12) {
                 ZStack {
-                    Circle().fill(.white.opacity(0.22)).frame(width: 36, height: 36)
-                    Image(systemName: done ? "checkmark" : "hand.tap.fill").font(.system(size: 17, weight: .bold)).foregroundStyle(.white)
+                    Circle().fill(equalGreen.opacity(0.1)).frame(width: 36, height: 36)
+                    Image(systemName: done ? "checkmark" : "hand.tap.fill").font(.system(size: 16, weight: .semibold)).foregroundStyle(equalGreen)
                 }
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(caption.step.uppercased()).font(.system(size: 11.5, weight: .bold)).foregroundStyle(.white.opacity(0.75)).tracking(0.6)
-                    Text(caption.text).font(.system(size: 17, weight: .bold)).foregroundStyle(.white).lineLimit(2).minimumScaleFactor(0.8)
+                    Text(caption.step.uppercased()).font(.system(size: 11.5, weight: .semibold)).foregroundStyle(secondary).tracking(0.6)
+                    Text(caption.text).font(.system(size: 17, weight: .semibold)).foregroundStyle(label).lineLimit(2).minimumScaleFactor(0.8)
                 }
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 18)
             .frame(height: 80)
-            .background(equalGreen)
+            .background(Color.white)
+            .overlay(alignment: .bottom) { Rectangle().fill(Color.black.opacity(0.08)).frame(height: 1) }
 
             // Phone
             ZStack(alignment: .topLeading) {
@@ -232,17 +236,17 @@ struct Frame: View {
         }
         .frame(width: size.width, height: size.height)
         .background(ios)
-        .overlay(GreenFrame().fill(equalGreen, style: FillStyle(eoFill: true)))
+        .overlay(GreenFrame().fill(frameGreen, style: FillStyle(eoFill: true)))
         .environment(\.colorScheme, .light)
     }
 }
 
 /// Everything outside a rounded rectangle inset by the border width. The PiP window's corners
 /// measure about 32 at this video size and it trims a few units off each edge, so the inner
-/// corners use a 26 radius to run parallel to the window's curve instead of thinning out.
+/// corners use a 27 radius to run parallel to the window's curve instead of thinning out.
 struct GreenFrame: Shape {
-    var width: CGFloat = 10
-    var innerRadius: CGFloat = 26
+    var width: CGFloat = 7
+    var innerRadius: CGFloat = 27
     func path(in r: CGRect) -> Path {
         var p = Path(r)
         p.addRoundedRect(in: r.insetBy(dx: width, dy: width),
