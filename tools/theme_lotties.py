@@ -6,6 +6,8 @@
 - voicemail.lottie: the app's voicemail.json, with each colour slot renamed for the screen it
   sits on.
 
+Both fade out at the bottom as the app fades them (opaque to 62 % of the height, then eased).
+
 Equal's own screens, tips and highlights take Equal's alias tokens (Figma "Colour Guide — Alias
 Tokens"); iOS screens (Phone keypad, Settings, status bar) take iOS's own light/dark colours.
 Some parts stay as drawn in both themes: the home screen (wallpaper and app icons), the
@@ -172,6 +174,39 @@ def split_voicemail(d):
     return d, rules
 
 
+# ---------------------------------------------------------------- bottom fade
+
+def fade_bottom(d, start=0.62):
+    """Fades the whole animation out at the bottom, as the app's SoftBottomFade does: opaque to
+    `start` of the height, then an eased (smoothstep) ramp to nothing at the bottom edge. The
+    animation moves into a precomp under an alpha matte holding that gradient."""
+    w, h, ip, op = d['w'], d['h'], d['ip'], d['op']
+    steps = 10
+    stops = [(0.0, 1.0)] + [(start + (1 - start) * i / steps,
+                              1 - (i / steps) ** 2 * (3 - 2 * i / steps)) for i in range(steps + 1)]
+    colours = [0, 0, 0, 0, 1, 0, 0, 0]
+    alphas = [x for pos, a in stops for x in (round(pos, 4), round(a, 4))]
+    static = lambda v: {'a': 0, 'k': v}
+    matte = {
+        'ddd': 0, 'ind': 1, 'ty': 4, 'nm': 'bottom fade (matte)', 'td': 1, 'sr': 1, 'ao': 0,
+        'ks': {'a': static([0, 0]), 'p': static([0, 0]), 's': static([100, 100]), 'r': static(0), 'o': static(100)},
+        'shapes': [{'ty': 'gr', 'nm': 'fade', 'it': [
+            {'ty': 'rc', 'd': 1, 'p': static([w / 2, h / 2]), 's': static([w, h]), 'r': static(0)},
+            {'ty': 'gf', 'o': static(100), 'r': 1, 't': 1, 's': static([w / 2, 0]), 'e': static([w / 2, h]),
+             'g': {'p': 2, 'k': static(colours + alphas)}},
+            {'ty': 'tr', 'p': static([0, 0]), 'a': static([0, 0]), 's': static([100, 100]), 'r': static(0),
+             'o': static(100), 'sk': static(0), 'sa': static(0)}]}],
+        'ip': ip, 'op': op, 'st': 0, 'bm': 0,
+    }
+    d['assets'].append({'id': 'content', 'nm': 'content', 'layers': d['layers']})
+    content = {'ddd': 0, 'ind': 2, 'ty': 0, 'nm': 'content', 'refId': 'content', 'tt': 1, 'sr': 1, 'ao': 0,
+               'ks': {'a': static([0, 0]), 'p': static([0, 0]), 's': static([100, 100]), 'r': static(0),
+                      'o': static(100)},
+               'w': w, 'h': h, 'ip': ip, 'op': op, 'st': 0, 'bm': 0}
+    d['layers'] = [matte, content]
+    return d
+
+
 # ---------------------------------------------------------------- packaging
 
 def pack(d, anim_id, rules, out):
@@ -191,10 +226,10 @@ def pack(d, anim_id, rules, out):
 def main():
     os.makedirs(OUT, exist_ok=True)
     d, rules = build_forwarding()
-    pack(d, 'forwarding', rules, os.path.join(OUT, 'forwarding.lottie'))
+    pack(fade_bottom(d), 'forwarding', rules, os.path.join(OUT, 'forwarding.lottie'))
     with open(os.path.join(SRC, 'voicemail.json')) as f:
         d, rules = split_voicemail(json.load(f))
-    pack(d, 'voicemail', rules, os.path.join(OUT, 'voicemail.lottie'))
+    pack(fade_bottom(d), 'voicemail', rules, os.path.join(OUT, 'voicemail.lottie'))
 
 
 if __name__ == '__main__':
